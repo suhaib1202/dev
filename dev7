@@ -1,0 +1,59 @@
+1.ansible --version
+2.mkdir kiran
+3.cd kiran
+4.gedit host
+[local]
+localhost ansible_connection=local
+5.ansible all -i host --list-hosts
+6.gedit hello.yaml
+- name: hello world playbook
+  hosts: localhost
+  connection: local
+  tasks:
+   - name: print hello world message
+     debug:
+       msg: "hello,world! wlcome to ansible"
+7.ansible-playbook -i host hello.yaml
+8.mkdir -p library
+9.cd library
+10.gedit hello_world.py
+#!/usr/bin/python
+ 
+from ansible.module_utils.basic import AnsibleModule
+ 
+def run_module():
+    module_args = dict(
+        name=dict(type='str', required=True)
+    )
+ 
+    module = AnsibleModule(argument_spec=module_args)
+ 
+    result = {
+        "changed": False,
+        "message": f"Hello {module.params['name']}!"
+    }
+ 
+    module.exit_json(**result)
+ 
+if __name__ == '__main__':
+    run_module()
+ 
+11.chmod 777 hello_world.py
+12.cd ..
+13.gedit play2.yml
+---
+- name: Test custom module
+  hosts: localhost
+  gather_facts: no
+ 
+  tasks:
+    - name: Say hello
+      hello_world:
+        name: "Ansible"
+      register: result
+ 
+    - name: Show message
+      debug:
+        msg: "{{ result.message }}"
+ 
+14.ansible-playbook -i host play2.yml
